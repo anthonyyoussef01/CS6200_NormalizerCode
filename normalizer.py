@@ -1,8 +1,6 @@
-
-
 ## Many URLs can refer to the same web resource. In order to ensure that you crawl 40,000 distinct web sites, you
 # should apply the following canonicalization rules to all URLs you encounter.
-
+from url_normalize import url_normalize
 
 def get_domain(url):
     url = canonicalize_single_url(url)
@@ -26,21 +24,15 @@ def canonicalize_single_url(url, domain=""):
 
     # Another way for the URL to be relative (starting with /, not ..):
     if url.startswith("/"):
-
         ## Normalize domain name
         domain = get_domain(domain)
         url = domain + url
 
     # Another way for the URL to be relative (starting with #):
     if url.startswith("#"):
-
         ## Normalize domain name
         domain = get_domain(domain)
         url = domain + url
-
-
-    # Make lowercase
-    url = url.lower()
 
     # Used to normalize everything to http or https
     if "http://www." in url:
@@ -48,6 +40,9 @@ def canonicalize_single_url(url, domain=""):
 
     elif "https://www." in url:
         schema = "https://"
+
+    elif "http://" in url:
+        schema = "http://"
 
     else:
         schema = "https://"
@@ -59,23 +54,11 @@ def canonicalize_single_url(url, domain=""):
     url = url.replace("https://", "")
     url = url.replace("www.", "")
 
-    # Remove any ports
-    url = url.replace(":80", "")
-    url = url.replace(":443", "")
-
     # Remove hash suffixes
     url = url.split("#")[0]
 
-    # Remove & suffixes
-    url = url.split("&")[0]
-
-    # Remove duplicate slashes
-    url = url.replace("//", "/")
-
-    # Remove final slashes before suffix
-    url = url.replace("/.", ".")
-
     url = schema + url
+    url = url_normalize(url)
     return url
 
 
@@ -94,6 +77,7 @@ def run_tests():
     print(canonicalize_single_url("http://www.example.com/a.html#anything"))
     print(canonicalize_single_url("http://www.example.com//a.html"))
     print(canonicalize_single_url("https://www.google.com/search?q=hash+table&oq=hash+table&aqs=chrome..69i57j0i67j0l3j0i10j0i67j0l3.3698j0j9&sourceid=chrome&ie=UTF-8"))
+    print(url_normalize("https://www.google.com/search?q=hash+table&oq=hash+table&aqs=chrome..69i57j0i67j0l3j0i10j0i67j0l3.3698j0j9&sourceid=chrome&ie=UTF-8"))
     print(get_domain("http://www.example.com/a.html"))
     print(get_domain("https://www.abc.com"))
     print(get_domain("abc.com"))
@@ -101,8 +85,7 @@ def run_tests():
     print(get_domain("www.abc.com/"))
     print(get_domain("www.abc.com/hi"))
     print(get_domain("https://www.google.com/search?q=hash+table&oq=hash+table&aqs=chrome..69i57j0i67j0l3j0i10j0i67j0l3.3698j0j9&sourceid=chrome&ie=UTF-8"))
+    print(canonicalize_single_url("https://abc.com"))
+    print(canonicalize_single_url("http://abc.com"))
 
-
-# run_tests()
-
-
+#run_tests()
